@@ -1,0 +1,44 @@
+{
+  "name": "multi-drive-mcp",
+  "version": "0.1.0",
+  "description": "MCP server that connects several Google Drive accounts (work, personal, games...) to Claude and other MCP clients — one server per account, so they never mix.",
+  "main": "dist/cli.js",
+  "scripts": {
+    "build": "tsc && chmod +x dist/cli.js",
+    "prepublishOnly": "npm run build",
+    "start": "node dist/cli.js",
+    "prepare": "npm run build"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "google-drive",
+    "claude",
+    "multi-account"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "@googleapis/drive": "^27.1.0",
+    "@modelcontextprotocol/sdk": "^1.32.2",
+    "google-auth-library": "^11.3.4",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "typescript": "^7.0.2"
+  },
+  "type": "module",
+  "bin": {
+    "multi-drive-mcp": "dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "README.pt-BR.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "author": ""
+}

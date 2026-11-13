@@ -1,0 +1,6 @@
+node_modules/
+dist/
+credentials.json
+accounts/
+*.tgz
+.DS_Store
