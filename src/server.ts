@@ -5,6 +5,7 @@ import { drive as makeDrive, type drive_v3 } from "@googleapis/drive";
 import { z } from "zod";
 import {
   getAuthorizedClient,
+  hasClientSecrets,
   listAccounts,
   logout,
   startLogin,
@@ -12,7 +13,6 @@ import {
   type StoredAccount,
 } from "./auth.js";
 import { credentialsPath, validateAlias } from "./paths.js";
-import { existsSync } from "node:fs";
 import { openAccountManager } from "./manager.js";
 
 const FOLDER = "application/vnd.google-apps.folder";
@@ -206,7 +206,7 @@ export async function startServer(opts: { account?: string; readOnly: boolean })
       },
       safe(async (a) => {
         const alias = validateAlias(a.alias);
-        if (!existsSync(credentialsPath())) {
+        if (!hasClientSecrets()) {
           throw new Error(
             `Google OAuth client file not found at ${credentialsPath()}. ` +
               `Set it in the extension settings (Google OAuth client file) — see the README, "Google Cloud setup".`,

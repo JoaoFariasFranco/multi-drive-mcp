@@ -36,10 +36,13 @@ As ferramentas de escrita ficam escondidas quando a conta é somente leitura.
 
 ## Jeito mais fácil: extensão do Claude Desktop (um conector, com tela de contas)
 
-1. Faça a **configuração no Google Cloud** abaixo (passo 1) e salve o `credentials.json`.
-2. Baixe o `multi-drive-mcp.mcpb` na página de [Releases](https://github.com/JoaoFariasFranco/multi-drive-mcp/releases), ou gere com `npm run build:mcpb`.
-3. No Claude Desktop: **Configurações → Extensões → Configurações avançadas → Instalar extensão…** e escolha o arquivo (ou dê dois cliques nele).
-4. Numa conversa, peça ao Claude para *"abrir a tela de contas do Google Drive"*. Abre uma página no navegador com as contas conectadas e o botão **Adicionar conta**.
+1. Baixe o `multi-drive-mcp.mcpb` na página de [Releases](https://github.com/JoaoFariasFranco/multi-drive-mcp/releases).
+2. Dê dois cliques nele, ou no Claude Desktop vá em **Configurações → Desktop app → Gerenciar (Extensões) → Configurações avançadas → Instalar extensão…** e escolha o arquivo. Deixe o campo opcional de OAuth em branco.
+3. Numa conversa, peça ao Claude para *"abrir a tela de contas do Google Drive"*. Abre uma página no navegador com as contas conectadas e o botão **Adicionar conta**.
+
+Não precisa instalar mais nada: a extensão já vem com um cliente de login do Google embutido. Na hora de entrar, o Google mostra um aviso de "app não verificado" (clique em **Avançado → Acessar multi-drive-mcp**).
+
+**Para gerar a sua própria extensão:** crie um cliente OAuth do tipo "App para computador" (configuração no Google Cloud abaixo) e rode `MULTI_DRIVE_MCP_EMBED_CLIENT=/caminho/cliente.json npm run build:mcpb`. A credencial vai só para o `.mcpb`, nunca para o repositório.
 
 Nesse modo, todas as contas ficam num conector só e toda ferramenta do Drive recebe o argumento `account`, então o Claude sempre diz qual conta está usando. Se preferir um conector por conta (para ligar e desligar cada uma por conversa), use a instalação manual abaixo.
 

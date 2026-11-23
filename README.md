@@ -36,10 +36,13 @@ Write tools are hidden when the account is read-only.
 
 ## Easiest: Claude Desktop extension (one connector, account screen)
 
-1. Do the **Google Cloud setup** below (step 1) and save `credentials.json`.
-2. Download `multi-drive-mcp.mcpb` from the [Releases](https://github.com/JoaoFariasFranco/multi-drive-mcp/releases) page (or build it with `npm run build:mcpb`).
-3. In Claude Desktop: **Settings → Extensions → Advanced settings → Install extension…** and pick the file (or just double-click it).
-4. In a chat, ask Claude to *"open the Google Drive account screen"*. A page opens in your browser listing the connected accounts, with an **Add account** button.
+1. Download `multi-drive-mcp.mcpb` from the [Releases](https://github.com/JoaoFariasFranco/multi-drive-mcp/releases) page.
+2. Double-click it, or in Claude Desktop go to **Settings → Desktop app → Manage (Extensions) → Advanced settings → Install extension…** and pick the file. Leave the optional OAuth field empty.
+3. In a chat, ask Claude to *"open the Google Drive account screen"*. A page opens in your browser listing the connected accounts, with an **Add account** button.
+
+Nothing else to install: the extension ships with a built-in Google sign-in client. Google will show an "unverified app" warning on sign-in (click **Advanced → Go to multi-drive-mcp**).
+
+**Building your own extension:** create a Desktop-app OAuth client (Google Cloud setup below) and run `MULTI_DRIVE_MCP_EMBED_CLIENT=/path/to/client.json npm run build:mcpb`. The client is baked into the `.mcpb` only, never into the repository.
 
 In this mode all accounts live in one connector, and every Drive tool takes an `account` argument, so Claude always says which account it is using. If you'd rather have one connector per account (so you can switch each on or off per chat), use the manual setup below.
 

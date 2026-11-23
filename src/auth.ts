@@ -23,10 +23,32 @@ export interface StoredAccount {
   createdAt: string;
 }
 
-/** Reads the OAuth client JSON ("Desktop app" type) downloaded from Google Cloud Console. */
+/**
+ * OAuth client baked into prebuilt packages (e.g. the Claude Desktop extension) at build time,
+ * so end users don't have to create their own. Never committed to the repository.
+ */
+declare const __EMBEDDED_OAUTH_CLIENT__: string | undefined;
+function embeddedClient(): ClientSecrets | undefined {
+  if (typeof __EMBEDDED_OAUTH_CLIENT__ === "undefined" || !__EMBEDDED_OAUTH_CLIENT__) return undefined;
+  const raw = JSON.parse(__EMBEDDED_OAUTH_CLIENT__);
+  const c = raw.installed ?? raw.web ?? raw;
+  return c?.client_id ? { client_id: c.client_id, client_secret: c.client_secret } : undefined;
+}
+
+/** True when an OAuth client is available (user file or built-in). */
+export function hasClientSecrets(): boolean {
+  return existsSync(credentialsPath()) || !!embeddedClient();
+}
+
+/**
+ * The OAuth client: the user's own file if present (credentials.json or the path in
+ * MULTI_DRIVE_MCP_CREDENTIALS), otherwise the one built into this package.
+ */
 export async function loadClientSecrets(): Promise<ClientSecrets> {
   const p = credentialsPath();
   if (!existsSync(p)) {
+    const builtIn = embeddedClient();
+    if (builtIn) return builtIn;
     throw new Error(
       `OAuth client file not found at ${p}.\n` +
         `Create a "Desktop app" OAuth client in Google Cloud Console, download the JSON and save it there\n` +

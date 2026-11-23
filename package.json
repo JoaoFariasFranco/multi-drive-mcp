@@ -1,6 +1,6 @@
 {
   "name": "multi-drive-mcp",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "MCP server that connects several Google Drive accounts (work, personal, games...) to Claude and other MCP clients — one server per account, so they never mix.",
   "main": "dist/cli.js",
   "scripts": {
@@ -8,7 +8,7 @@
     "prepublishOnly": "npm run build",
     "start": "node dist/cli.js",
     "prepare": "npm run build",
-    "build:mcpb": "npm run build && esbuild src/cli.ts --bundle --platform=node --target=node18 --format=cjs --outfile=mcpb/server/index.js && cp LICENSE mcpb/ && mcpb pack mcpb multi-drive-mcp.mcpb"
+    "build:mcpb": "npm run build && node scripts/build-mcpb.mjs"
   },
   "keywords": [
     "mcp",

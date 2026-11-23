@@ -1,8 +1,7 @@
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import { randomBytes } from "node:crypto";
-import { existsSync } from "node:fs";
 import type { AddressInfo } from "node:net";
-import { listAccounts, logout, openBrowser, startLogin, type PendingLogin } from "./auth.js";
+import { hasClientSecrets, listAccounts, logout, openBrowser, startLogin, type PendingLogin } from "./auth.js";
 import { credentialsPath, validateAlias } from "./paths.js";
 
 /**
@@ -124,7 +123,7 @@ async function create(onChange?: () => void): Promise<{ url: string }> {
       notice = t.exists(exists);
       kind = "err";
     }
-    const hasCreds = existsSync(credentialsPath());
+    const hasCreds = hasClientSecrets();
 
     const rows = accounts
       .map(

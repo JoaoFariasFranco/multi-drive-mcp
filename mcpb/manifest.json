@@ -2,49 +2,116 @@
   "manifest_version": "0.3",
   "name": "multi-drive-mcp",
   "display_name": "Google Drive (várias contas)",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Connect several Google Drive accounts (work, personal, games...) to Claude, each with its own separate login.",
-  "long_description": "Adds one Google Drive connector that can use several Google accounts without mixing them. Ask Claude to \"open the account screen\" (or \"abre a tela de contas\") to see connected accounts and add or remove them. Every Drive action names the account it uses. Logins stay on your computer. Requires your own Google OAuth client (Desktop app) — see the README.",
-  "author": { "name": "João Franco", "url": "https://github.com/JoaoFariasFranco" },
-  "repository": { "type": "git", "url": "https://github.com/JoaoFariasFranco/multi-drive-mcp" },
+  "long_description": "Adds one Google Drive connector that can use several Google accounts without mixing them. Ask Claude to \"open the account screen\" (or \"abre a tela de contas\") to see connected accounts and add or remove them. Every Drive action names the account it uses. Logins stay on your computer.",
+  "author": {
+    "name": "João Franco",
+    "url": "https://github.com/JoaoFariasFranco"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/JoaoFariasFranco/multi-drive-mcp"
+  },
   "homepage": "https://github.com/JoaoFariasFranco/multi-drive-mcp",
   "documentation": "https://github.com/JoaoFariasFranco/multi-drive-mcp#readme",
   "support": "https://github.com/JoaoFariasFranco/multi-drive-mcp/issues",
   "icon": "icon.png",
   "license": "MIT",
-  "keywords": ["google drive", "multi-account", "drive", "google"],
+  "keywords": [
+    "google drive",
+    "multi-account",
+    "drive",
+    "google"
+  ],
   "server": {
     "type": "node",
     "entry_point": "server/index.js",
     "mcp_config": {
       "command": "node",
-      "args": ["${__dirname}/server/index.js", "serve"],
-      "env": { "MULTI_DRIVE_MCP_CREDENTIALS": "${user_config.credentials_file}" }
+      "args": [
+        "${__dirname}/server/index.js",
+        "serve"
+      ],
+      "env": {
+        "MULTI_DRIVE_MCP_CREDENTIALS": "${user_config.credentials_file}"
+      }
     }
   },
   "user_config": {
     "credentials_file": {
       "type": "file",
-      "title": "Google OAuth client file (optional)",
-      "description": "The \"Desktop app\" OAuth client JSON from Google Cloud. Leave empty if it is already saved as credentials.json in the multi-drive-mcp config folder.",
+      "title": "Own Google OAuth client (advanced, optional)",
+      "description": "Leave empty to use the built-in one. Only set this if you created your own \"Desktop app\" OAuth client in Google Cloud.",
       "required": false
     }
   },
   "tools": [
-    { "name": "manage_accounts", "description": "Open the account screen: see connected Google accounts, add or remove them" },
-    { "name": "list_accounts", "description": "List connected Google accounts" },
-    { "name": "add_account", "description": "Connect a new Google account from the chat" },
-    { "name": "remove_account", "description": "Disconnect a Google account" },
-    { "name": "account_info", "description": "Which Google account an alias uses, and storage usage" },
-    { "name": "search_files", "description": "Search files by name, content, type or folder" },
-    { "name": "list_folder", "description": "List a folder" },
-    { "name": "get_file_metadata", "description": "File details and link" },
-    { "name": "read_file", "description": "Read Docs, Sheets, Slides, text files and images" },
-    { "name": "create_file", "description": "Create a file, Google Doc or Google Sheet" },
-    { "name": "update_file", "description": "Replace contents or rename a file" },
-    { "name": "create_folder", "description": "Create a folder" },
-    { "name": "move_file", "description": "Move a file to another folder" },
-    { "name": "trash_file", "description": "Move a file to the trash (never deletes permanently)" }
+    {
+      "name": "manage_accounts",
+      "description": "Open the account screen: see connected Google accounts, add or remove them"
+    },
+    {
+      "name": "list_accounts",
+      "description": "List connected Google accounts"
+    },
+    {
+      "name": "add_account",
+      "description": "Connect a new Google account from the chat"
+    },
+    {
+      "name": "remove_account",
+      "description": "Disconnect a Google account"
+    },
+    {
+      "name": "account_info",
+      "description": "Which Google account an alias uses, and storage usage"
+    },
+    {
+      "name": "search_files",
+      "description": "Search files by name, content, type or folder"
+    },
+    {
+      "name": "list_folder",
+      "description": "List a folder"
+    },
+    {
+      "name": "get_file_metadata",
+      "description": "File details and link"
+    },
+    {
+      "name": "read_file",
+      "description": "Read Docs, Sheets, Slides, text files and images"
+    },
+    {
+      "name": "create_file",
+      "description": "Create a file, Google Doc or Google Sheet"
+    },
+    {
+      "name": "update_file",
+      "description": "Replace contents or rename a file"
+    },
+    {
+      "name": "create_folder",
+      "description": "Create a folder"
+    },
+    {
+      "name": "move_file",
+      "description": "Move a file to another folder"
+    },
+    {
+      "name": "trash_file",
+      "description": "Move a file to the trash (never deletes permanently)"
+    }
   ],
-  "compatibility": { "platforms": ["win32", "darwin", "linux"], "runtimes": { "node": ">=18.0.0" } }
+  "compatibility": {
+    "platforms": [
+      "win32",
+      "darwin",
+      "linux"
+    ],
+    "runtimes": {
+      "node": ">=18.0.0"
+    }
+  }
 }
