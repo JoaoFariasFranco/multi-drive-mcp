@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "multi-drive-mcp",
   "display_name": "Google Drive (várias contas)",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Connect several Google Drive accounts (work, personal, games...) to Claude, each with its own separate login.",
   "long_description": "Adds one Google Drive connector that can use several Google accounts without mixing them. Ask Claude to \"open the account screen\" (or \"abre a tela de contas\") to see connected accounts and add or remove them. Every Drive action names the account it uses. Logins stay on your computer.",
   "author": {
@@ -32,18 +32,7 @@
       "args": [
         "${__dirname}/server/index.js",
         "serve"
-      ],
-      "env": {
-        "MULTI_DRIVE_MCP_CREDENTIALS": "${user_config.credentials_file}"
-      }
-    }
-  },
-  "user_config": {
-    "credentials_file": {
-      "type": "file",
-      "title": "Own Google OAuth client (advanced, optional)",
-      "description": "Leave empty to use the built-in one. Only set this if you created your own \"Desktop app\" OAuth client in Google Cloud.",
-      "required": false
+      ]
     }
   },
   "tools": [

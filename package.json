@@ -1,6 +1,6 @@
 {
   "name": "multi-drive-mcp",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "MCP server that connects several Google Drive accounts (work, personal, games...) to Claude and other MCP clients — one server per account, so they never mix.",
   "main": "dist/cli.js",
   "scripts": {
