@@ -55,7 +55,7 @@ export async function loadAccount(alias: string): Promise<StoredAccount> {
   const p = tokenPath(alias);
   if (!existsSync(p)) {
     throw new Error(
-      `Account "${alias}" is not logged in. Run:  npx multi-drive-mcp auth ${alias}`,
+      `Account "${alias}" is not connected. Add it on the account screen (manage_accounts tool) or run: multi-drive-mcp auth ${alias}`,
     );
   }
   return JSON.parse(await readFile(p, "utf8")) as StoredAccount;
@@ -74,7 +74,7 @@ export async function getAuthorizedClient(alias: string): Promise<{ client: OAut
   return { client, account };
 }
 
-function openBrowser(url: string): void {
+export function openBrowser(url: string): void {
   // On Windows, avoid `cmd /c start`: cmd treats "&" in the URL as a command separator
   // and truncates the OAuth URL. rundll32 passes the URL through untouched.
   const cmd = process.platform === "darwin" ? "open" : process.platform === "win32" ? "rundll32" : "xdg-open";
@@ -93,11 +93,21 @@ const page = (title: string, body: string) =>
   `<body style="font-family:system-ui;max-width:32rem;margin:4rem auto;line-height:1.5">` +
   `<h2>${title}</h2><p>${body}</p></body>`;
 
+export interface PendingLogin {
+  alias: string;
+  authUrl: string;
+  /** Resolves when the user finishes signing in in the browser (or rejects on error/timeout). */
+  done: Promise<StoredAccount>;
+}
+
 /**
- * Interactive login for one alias using the loopback redirect + PKCE flow
- * recommended by Google for desktop apps.
+ * Starts the loopback redirect + PKCE login recommended by Google for desktop apps.
+ * Returns immediately with the URL; `done` settles once the browser flow completes.
  */
-export async function login(aliasInput: string, opts: { readOnly: boolean; loginHint?: string }): Promise<StoredAccount> {
+export async function startLogin(
+  aliasInput: string,
+  opts: { readOnly: boolean; loginHint?: string; openBrowser?: boolean; timeoutMs?: number; returnUrl?: string },
+): Promise<PendingLogin> {
   const alias = validateAlias(aliasInput);
   const secrets = await loadClientSecrets();
   const state = randomBytes(16).toString("hex");
@@ -125,8 +135,11 @@ export async function login(aliasInput: string, opts: { readOnly: boolean; login
     login_hint: opts.loginHint,
   });
 
-  const tokens = await new Promise<Credentials>((resolve, reject) => {
-    const timer = setTimeout(() => reject(new Error("Timed out waiting for Google login (5 minutes).")), 5 * 60_000);
+  const tokensP = new Promise<Credentials>((resolve, reject) => {
+    const timer = setTimeout(
+      () => reject(new Error("Timed out waiting for Google login.")),
+      opts.timeoutMs ?? 5 * 60_000,
+    );
     server.on("request", async (req, res) => {
       const url = new URL(req.url ?? "/", redirectUri);
       if (url.pathname !== "/") {
@@ -137,7 +150,10 @@ export async function login(aliasInput: string, opts: { readOnly: boolean; login
       const got = url.searchParams.get("code");
       res.setHeader("Content-Type", "text/html; charset=utf-8");
       if (err || !got || url.searchParams.get("state") !== state) {
-        res.end(page("Login failed", `Google returned: ${err ?? "invalid response"}. You can close this tab.`));
+        res.end(
+          page("Login failed", `Google returned: ${err ?? "invalid response"}.` +
+            (opts.returnUrl ? ` <a href="${opts.returnUrl}">Back</a>` : " You can close this tab.")),
+        );
         clearTimeout(timer);
         reject(new Error(`Login failed: ${err ?? "invalid state or missing code"}`));
         return;
@@ -145,38 +161,53 @@ export async function login(aliasInput: string, opts: { readOnly: boolean; login
       clearTimeout(timer);
       try {
         const { tokens } = await client.getToken({ code: got, codeVerifier, redirect_uri: redirectUri });
-        res.end(page("Connected ✔", `Account <b>${alias}</b> is connected. You can close this tab and go back to the terminal.`));
+        res.end(
+          opts.returnUrl
+            ? `<!doctype html><meta charset="utf-8"><meta http-equiv="refresh" content="0;url=${opts.returnUrl}">` +
+                `<a href="${opts.returnUrl}">Continue</a>`
+            : page("Connected ✔", `Account <b>${alias}</b> is connected. You can close this tab.`),
+        );
         resolve(tokens);
       } catch (e: any) {
-        res.end(page("Login failed", `Could not finish signing in (${e?.message ?? e}). Check the terminal.`));
+        res.end(page("Login failed", `Could not finish signing in (${e?.message ?? e}).`));
         reject(e);
       }
     });
-
-    process.stderr.write(`\nOpening your browser to sign in for account "${alias}".\n`);
-    process.stderr.write(`Pick the Google account you want to use as "${alias}".\n`);
-    process.stderr.write(`If the browser doesn't open, paste this URL:\n\n${authUrl}\n\n`);
-    openBrowser(authUrl);
   }).finally(() => server.close());
 
-  if (!tokens.refresh_token) {
-    throw new Error(
-      "Google did not return a refresh token. Remove this app's access at https://myaccount.google.com/permissions and try again.",
-    );
-  }
-  let email: string | undefined;
-  if (tokens.id_token) {
-    try {
-      const ticket = await client.verifyIdToken({ idToken: tokens.id_token, audience: secrets.client_id });
-      email = ticket.getPayload()?.email;
-    } catch {
-      /* email is cosmetic */
+  const done = tokensP.then(async (tokens) => {
+    if (!tokens.refresh_token) {
+      throw new Error(
+        "Google did not return a refresh token. Remove this app's access at https://myaccount.google.com/permissions and try again.",
+      );
     }
-  }
+    let email: string | undefined;
+    if (tokens.id_token) {
+      try {
+        const ticket = await client.verifyIdToken({ idToken: tokens.id_token, audience: secrets.client_id });
+        email = ticket.getPayload()?.email;
+      } catch {
+        /* email is cosmetic */
+      }
+    }
+    const acc: StoredAccount = { alias, email, readOnly: opts.readOnly, tokens, createdAt: new Date().toISOString() };
+    await saveAccount(acc);
+    return acc;
+  });
+  done.catch(() => {}); // callers may not await it
 
-  const acc: StoredAccount = { alias, email, readOnly: opts.readOnly, tokens, createdAt: new Date().toISOString() };
-  await saveAccount(acc);
-  return acc;
+  if (opts.openBrowser !== false) openBrowser(authUrl);
+  return { alias, authUrl, done };
+}
+
+/** Terminal login: opens the browser and waits for completion. */
+export async function login(aliasInput: string, opts: { readOnly: boolean; loginHint?: string }): Promise<StoredAccount> {
+  const pending = await startLogin(aliasInput, { ...opts, openBrowser: false });
+  process.stderr.write(`\nOpening your browser to sign in for account "${pending.alias}".\n`);
+  process.stderr.write(`Pick the Google account you want to use as "${pending.alias}".\n`);
+  process.stderr.write(`If the browser doesn't open, paste this URL:\n\n${pending.authUrl}\n\n`);
+  openBrowser(pending.authUrl);
+  return pending.done;
 }
 
 export async function listAccounts(): Promise<StoredAccount[]> {

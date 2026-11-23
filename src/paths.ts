@@ -10,8 +10,15 @@ import { join } from "node:path";
  * <home> defaults to ~/.config/multi-drive-mcp (or %APPDATA%\multi-drive-mcp on Windows)
  * and can be overridden with the MULTI_DRIVE_MCP_HOME environment variable.
  */
+/** Env var value, ignoring empty strings and unsubstituted "${...}" placeholders from MCP clients. */
+function env(name: string): string | undefined {
+  const v = process.env[name]?.trim();
+  return v && !v.includes("${") ? v : undefined;
+}
+
 export function configHome(): string {
-  if (process.env.MULTI_DRIVE_MCP_HOME) return process.env.MULTI_DRIVE_MCP_HOME;
+  const home = env("MULTI_DRIVE_MCP_HOME");
+  if (home) return home;
   if (process.platform === "win32" && process.env.APPDATA) {
     return join(process.env.APPDATA, "multi-drive-mcp");
   }
@@ -20,7 +27,7 @@ export function configHome(): string {
 }
 
 export function credentialsPath(): string {
-  return process.env.MULTI_DRIVE_MCP_CREDENTIALS || join(configHome(), "credentials.json");
+  return env("MULTI_DRIVE_MCP_CREDENTIALS") || join(configHome(), "credentials.json");
 }
 
 export function accountsDir(): string {

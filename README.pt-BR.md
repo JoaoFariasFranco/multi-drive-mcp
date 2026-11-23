@@ -34,7 +34,17 @@ Claude ──┬── drive-trabalho → eu@empresa.com
 
 As ferramentas de escrita ficam escondidas quando a conta é somente leitura.
 
-## Instalação
+## Jeito mais fácil: extensão do Claude Desktop (um conector, com tela de contas)
+
+1. Faça a **configuração no Google Cloud** abaixo (passo 1) e salve o `credentials.json`.
+2. Baixe o `multi-drive-mcp.mcpb` na página de [Releases](https://github.com/JoaoFariasFranco/multi-drive-mcp/releases), ou gere com `npm run build:mcpb`.
+3. No Claude Desktop: **Configurações → Extensões → Configurações avançadas → Instalar extensão…** e escolha o arquivo (ou dê dois cliques nele).
+4. Numa conversa, peça ao Claude para *"abrir a tela de contas do Google Drive"*. Abre uma página no navegador com as contas conectadas e o botão **Adicionar conta**.
+
+Nesse modo, todas as contas ficam num conector só e toda ferramenta do Drive recebe o argumento `account`, então o Claude sempre diz qual conta está usando. Se preferir um conector por conta (para ligar e desligar cada uma por conversa), use a instalação manual abaixo.
+
+## Instalação manual (um conector por conta)
+
 
 Você precisa do [Node.js](https://nodejs.org) 18 ou mais novo.
 

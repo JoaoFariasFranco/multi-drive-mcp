@@ -3,18 +3,23 @@ import { parseArgs } from "node:util";
 import { listAccounts, login, logout } from "./auth.js";
 import { configHome, credentialsPath } from "./paths.js";
 import { startServer } from "./server.js";
+import { openAccountManager } from "./manager.js";
 
 const HELP = `multi-drive-mcp — connect several Google Drive accounts to Claude (or any MCP client), one server per account.
 
 Usage:
   multi-drive-mcp auth <alias> [--read-only] [--email you@gmail.com]
         Sign in to a Google account and save it under <alias> (e.g. work, personal, games).
+  multi-drive-mcp manage
+        Open a screen in your browser to see, add and remove accounts.
   multi-drive-mcp accounts
         List the accounts you have signed in.
   multi-drive-mcp logout <alias>
         Revoke access and delete the saved login for <alias>.
   multi-drive-mcp --account <alias> [--read-only]
         Run the MCP server for one account (this is what goes in your MCP client config).
+  multi-drive-mcp serve
+        Run one MCP server for all signed-in accounts; accounts can be added from the chat.
   multi-drive-mcp paths
         Show where credentials and logins are stored.
 
@@ -39,8 +44,9 @@ async function main() {
     return;
   }
 
-  if (values.account && (!cmd || cmd === "serve")) {
-    await startServer(values.account, { readOnly });
+  if (cmd === "serve" || (!cmd && values.account)) {
+    // --account <alias>: one server per account. No --account: all accounts in one server.
+    await startServer({ account: values.account, readOnly });
     return;
   }
 
@@ -70,6 +76,12 @@ async function main() {
     case "logout": {
       if (!arg) throw new Error("Missing alias. Example: multi-drive-mcp logout games");
       process.stdout.write((await logout(arg)) ? `✔ "${arg}" removed.\n` : `No saved login for "${arg}".\n`);
+      return;
+    }
+    case "manage": {
+      const url = await openAccountManager();
+      process.stdout.write(`Account screen: ${url}\nPress Ctrl+C to close it.\n`);
+      setInterval(() => {}, 1 << 30); // keep running
       return;
     }
     case "paths":

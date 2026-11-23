@@ -34,7 +34,17 @@ Claude ──┬── drive-work      → work@company.com
 
 Write tools are hidden when the account is read-only.
 
-## Setup
+## Easiest: Claude Desktop extension (one connector, account screen)
+
+1. Do the **Google Cloud setup** below (step 1) and save `credentials.json`.
+2. Download `multi-drive-mcp.mcpb` from the [Releases](https://github.com/JoaoFariasFranco/multi-drive-mcp/releases) page (or build it with `npm run build:mcpb`).
+3. In Claude Desktop: **Settings → Extensions → Advanced settings → Install extension…** and pick the file (or just double-click it).
+4. In a chat, ask Claude to *"open the Google Drive account screen"*. A page opens in your browser listing the connected accounts, with an **Add account** button.
+
+In this mode all accounts live in one connector, and every Drive tool takes an `account` argument, so Claude always says which account it is using. If you'd rather have one connector per account (so you can switch each on or off per chat), use the manual setup below.
+
+## Manual setup (one connector per account)
+
 
 You need [Node.js](https://nodejs.org) 18 or newer.
 
