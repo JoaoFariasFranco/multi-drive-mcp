@@ -75,8 +75,10 @@ export async function getAuthorizedClient(alias: string): Promise<{ client: OAut
 }
 
 function openBrowser(url: string): void {
-  const cmd = process.platform === "darwin" ? "open" : process.platform === "win32" ? "cmd" : "xdg-open";
-  const args = process.platform === "win32" ? ["/c", "start", "", url] : [url];
+  // On Windows, avoid `cmd /c start`: cmd treats "&" in the URL as a command separator
+  // and truncates the OAuth URL. rundll32 passes the URL through untouched.
+  const cmd = process.platform === "darwin" ? "open" : process.platform === "win32" ? "rundll32" : "xdg-open";
+  const args = process.platform === "win32" ? ["url.dll,FileProtocolHandler", url] : [url];
   try {
     const child = spawn(cmd, args, { stdio: "ignore", detached: true });
     child.on("error", () => {});
